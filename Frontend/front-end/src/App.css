@@ -40,3 +40,34 @@
 .read-the-docs {
   color: #888;
 }
+
+img {
+  width: 200px;
+  
+}
+
+.home-button {
+  display: flex;
+  width: 300px;
+  height: 70px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  border-radius: 15px;
+}
+.view-pickups-container {
+ display: flex;
+ flex-direction: row;
+ flex-wrap: wrap;
+}
+.view-pickup-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px;
+  padding: 15px;
+}
+
+button {
+  margin-top: 20px;
+}

@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 const ViewPickups = () => {
     const [error, setError] = useState(null);
     const [pickups, setPickups] = useState([]);
-   
+    const navigate = useNavigate();
    
    
    
@@ -27,13 +28,15 @@ const ViewPickups = () => {
    
     return ( 
         <>
-       <div>
+        <div><button onClick={() => navigate("/")}>Back</button></div>
+       <div className="view-pickups-container">
         {pickups.map((pickup) => (
-            <div key={pickup.id}>
-                <h2>Pick Up Date: {new Date(pickup.pickupDate).toLocaleDateString()}</h2>
-                <h2>Name: {pickup.name}</h2>
-                <h2>Items: {pickup.items}</h2>
+            <div className="view-pickup-card" key={pickup.id}>
+                <h3>Pick Up Date: {new Date(pickup.pickupDate).toLocaleDateString()}</h3>
+                <h3>Name: {pickup.name}</h3>
+                <h3>Items: {pickup.items}</h3>
                 {pickup.image && <img src={pickup.image} alt={pickup.items} />}
+                <button onClick={() => navigate(`/viewpickups/${pickup.id}`)}>See More</button>
 
                 </div>
         ))}

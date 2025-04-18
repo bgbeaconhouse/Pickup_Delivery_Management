@@ -15,4 +15,53 @@ router.get("/", async (req, res, next) => {
     }
   });
 
+    // Get a specific pickup
+    router.get("/:id", async (req, res, next) => {
+      try {
+        const id = +req.params.id;
+    
+        const pickup = await prisma.pickup.findUnique({ where: { id } });
+    
+        if (!pickup) {
+          return next({
+            status: 404,
+            message: `Could not find pickup with id ${id}.`,
+          });
+        }
+    
+        res.json(pickup);
+      } catch {
+        next();
+      }
+    });
+
+      // Add a new pickup
+  router.post("/", async (req, res, next) => {
+   
+    try {
+    
+      const { name, phoneNumber, items, image, notes, pickupDate } = req.body;
+      console.log(req.body);
+      
+  
+      
+      if (!name || !phoneNumber || !items || !image || !notes || !pickupDate) {
+    
+        const error = {
+          status: 400,
+          message: "Pick Up is missing essential information.",
+        };
+  
+       
+        return next(error);
+      }
+     
+      const pickup = await prisma.pickup.create({ data: { name, phoneNumber, items, image, notes, pickupDate } });
+      
+      res.status(201).json(pickup);
+    } catch {
+      next();
+    }
+  });
+
   module.exports = router;
