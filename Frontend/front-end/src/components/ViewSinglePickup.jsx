@@ -58,6 +58,7 @@ const ViewSinglePickup = () => {
           <h3>Notes: {singlePickup.notes}</h3>
           {singlePickup.image && <img src={singlePickup.image} alt={singlePickup.items} />}
          <button onClick={handleDelete}>Delete</button>
+         <button onClick={() => navigate(`/editpickupform/${id}`)}>Edit</button>
         </div>
       </div>
 

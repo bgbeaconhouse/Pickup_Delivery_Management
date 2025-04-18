@@ -102,6 +102,7 @@ router.put("/:id", async (req, res, next) => {
 
     
     const { name, phoneNumber, items, image, notes, pickupDate } = req.body;
+    const date = new Date (pickupDate)
     if (!name || !phoneNumber || !items || !image || !notes || !pickupDate) {
       return next({
         status: 400,
@@ -112,7 +113,7 @@ router.put("/:id", async (req, res, next) => {
   
     const pickup = await prisma.pickup.update({
       where: { id },
-      data: { name, phoneNumber, items, image, notes, pickupDate },
+      data: { name, phoneNumber, items, image, notes, pickupDate: date },
     });
 
     res.json(pickup);

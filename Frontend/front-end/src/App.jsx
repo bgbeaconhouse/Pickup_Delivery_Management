@@ -7,6 +7,8 @@ import ViewPickups from './components/ViewPickups'
 import Home from './components/Home'
 import ViewSinglePickup from './components/ViewSinglePickup'
 import AddPickupForm from './components/AddPickUpForm'
+import EditPickupForm from './components/EditPickupForm'
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -18,6 +20,7 @@ function App() {
      <Route path="/viewpickups" element={<ViewPickups/>} />
      <Route path="/viewpickups/:id" element={<ViewSinglePickup/>} />
      <Route path="/addpickupform" element={<AddPickupForm/>} />
+     <Route path="/editpickupform/:id" element={<EditPickupForm/>} />
      </Routes>
     </>
   )
