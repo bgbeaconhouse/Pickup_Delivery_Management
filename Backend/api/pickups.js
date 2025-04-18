@@ -41,8 +41,8 @@ router.get("/", async (req, res, next) => {
     try {
     
       const { name, phoneNumber, items, image, notes, pickupDate } = req.body;
-      console.log(req.body);
-      
+      console.log("request body:",req.body);
+      const date = new Date (pickupDate)
   
       
       if (!name || !phoneNumber || !items || !image || !notes || !pickupDate) {
@@ -56,8 +56,8 @@ router.get("/", async (req, res, next) => {
         return next(error);
       }
      
-      const pickup = await prisma.pickup.create({ data: { name, phoneNumber, items, image, notes, pickupDate } });
-      
+      const pickup = await prisma.pickup.create({ data: { name, phoneNumber, items, image, notes, pickupDate: date } });
+      console.log(pickup)
       res.status(201).json(pickup);
     } catch {
       next();
