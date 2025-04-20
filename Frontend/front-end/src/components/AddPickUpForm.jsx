@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { useNavigate } from 'react-router-dom';
 const AddPickupForm = () => {
 const [name, setName] = useState("")
 const [phoneNumber, setPhoneNumber] = useState("")
@@ -7,7 +7,7 @@ const [items, setItems] = useState("")
 const [image, setImage] = useState("")
 const [notes, setNotes] = useState("")
 const [pickupDate, setPickupDate] = useState("")
-
+const navigate = useNavigate();
 
 // console.log(items)
 
@@ -22,6 +22,8 @@ async function handleSubmit(e) {
             body: JSON.stringify({ name, phoneNumber, items, image, notes, pickupDate })
 
         })
+
+        
     } catch (error) {
         console.error(error.message)
     }
@@ -100,7 +102,7 @@ async function handleSubmit(e) {
  />
  </label>
  <br />
- <button type="submit">Submit</button>
+ <button onClick={() => navigate("/viewpickups/")} type="submit">Submit</button>
  </form>
         </>
      );

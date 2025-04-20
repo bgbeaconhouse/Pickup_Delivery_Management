@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useParams } from "react-router-dom";
+import dateAndTime from 'date-and-time';
 
 const ViewSinglePickup = () => {
     const [singlePickup, setSinglePickup] = useState([])
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const {id} = useParams()
+   
    
     useEffect(() => {
         async function fetchSinglePickup() {
@@ -45,13 +47,28 @@ const ViewSinglePickup = () => {
       return <div>Loading pickup details...</div>;
   }
    
+
+    const formatDate = (dateString) => {
+        if (!dateString) {
+          return 'Date not available';
+        }
+        const parts = dateString.split('-');
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+        const day = parseInt(parts[2], 10);
+        const localDate = new Date(year, month, day);
+        return dateAndTime.format(localDate, 'YYYY-MM-DD');
+      };
+   
+
+
     return (
         <>
         
         <div><button onClick={() => navigate("/viewpickups")}>Back</button></div>
       <div className="view-pickups-container">
         <div className="view-pickup-card" key={singlePickup.id}> {/* Access properties directly */}
-          <h3>Pick Up Date: {new Date(singlePickup.pickupDate).toLocaleDateString()}</h3>
+          <h3>Pick Up Date: {formatDate(singlePickup.pickupDate)}</h3>
           <h3>Name: {singlePickup.name}</h3>
           <h3>Phone: {singlePickup.phoneNumber}</h3>
           <h3>Items: {singlePickup.items}</h3>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import dateAndTime from 'date-and-time';
 
 const EditPickupForm = () => {
     const [singlePickup, setSinglePickup] = useState([]);
@@ -15,6 +16,7 @@ const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchSinglePickup() {
+
             try {
                 const response = await fetch (`http://localhost:3000/api/pickups/${id}`)
                 const result = await response.json()
@@ -24,11 +26,12 @@ const navigate = useNavigate();
                 setItems(result.items)
                 setImage(result.image)
                 setNotes(result.notes)
-                const date = new Date(result.pickupDate);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-                const day = String(date.getDate()).padStart(2, '0');
-                setPickupDate(`${year}-${month}-${day}`);
+                
+                if (result.pickupDate) {
+                    // Extract the date part (YYYY-MM-DD) from the UTC string
+                    const utcDatePart = result.pickupDate.substring(0, 10);
+                    setPickupDate(utcDatePart);
+                  }
             } catch (error) {
                 setError(error)
             }
@@ -45,8 +48,9 @@ const navigate = useNavigate();
                     headers: {
                         "Content-Type": "application/json"},
                     body: JSON.stringify({ name, phoneNumber, items, image, notes, pickupDate })
-        
+                       
                 })
+                
             } catch (error) {
                 console.error(error.message)
             }
@@ -123,7 +127,7 @@ const navigate = useNavigate();
  />
  </label>
  <br />
- <button onClick={() => navigate("/viewpickups")} type="submit">Submit</button>
+ <button onClick={() => navigate(`/viewpickups/${id}`)}  type="submit">Submit</button>
  </form>
         
         </>
