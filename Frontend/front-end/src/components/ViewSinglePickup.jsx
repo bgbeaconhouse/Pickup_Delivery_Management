@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import dateAndTime from 'date-and-time';
+import './ViewSinglePickup.css'; // Import the CSS file
 
 const ViewSinglePickup = () => {
-  const [singlePickup, setSinglePickup] = useState(null); // Initialize as null for loading state
+  const [singlePickup, setSinglePickup] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -40,7 +41,7 @@ const ViewSinglePickup = () => {
       }
     }
     fetchSinglePickup();
-  }, [id, navigate]); // Include id and navigate in the dependency array
+  }, [id, navigate]);
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this pickup?")) {
@@ -56,7 +57,7 @@ const ViewSinglePickup = () => {
           if (response.status === 401 || response.status === 403) {
             console.error('Unauthorized to delete pickup');
             setError('Unauthorized to delete this pickup.');
-            return; // Don't navigate, just show the error
+            return;
           } else {
             const errorMessage = await response.text();
             throw new Error(`HTTP error! status: ${response.status}: ${errorMessage}`);
@@ -72,11 +73,11 @@ const ViewSinglePickup = () => {
   };
 
   if (error) {
-    return <div style={{ color: 'red' }}>Error: {error}</div>;
+    return <div className="error-container">Error: {error}</div>;
   }
 
   if (!singlePickup) {
-    return <div>Loading pickup details...</div>;
+    return <div className="loading-container">Loading pickup details...</div>;
   }
 
   const formatDate = (dateString) => {
@@ -92,25 +93,58 @@ const ViewSinglePickup = () => {
   };
 
   return (
-    <>
-      <div><button onClick={() => navigate("/viewpickups")}>Back</button></div>
-      <div className="view-pickups-container">
-        <div className="view-pickup-card" key={singlePickup.id}>
-          <h3>Pick Up Date: {formatDate(singlePickup.pickupDate)}</h3>
-          <h3>Name: {singlePickup.name}</h3>
-          <h3>Phone: {singlePickup.phoneNumber}</h3>
-          <h3>Items: {singlePickup.items}</h3>
-          <h3>Notes: {singlePickup.notes}</h3>
-          {singlePickup.image && <img
-            src={`http://localhost:3000/uploads/${singlePickup.image}`}
-            alt={singlePickup.items}
-            style={{ maxWidth: '300px', maxHeight: '300px' }}
-          />}
-          <button onClick={handleDelete}>Delete</button>
-          <button onClick={() => navigate(`/editpickupform/${id}`)}>Edit</button>
+    <div className="view-single-pickup-page">
+      <div className="back-button-container">
+        <button onClick={() => navigate("/viewpickups")} className="back-button">
+          Back to Pick Ups
+        </button>
+      </div>
+      <div className="single-pickup-container">
+        <h2 className="pickup-title">Pickup Details</h2>
+        <div className="pickup-details">
+          <div className="detail-item">
+            <span className="detail-label">Pick Up Date:</span>
+            <span className="detail-value">{formatDate(singlePickup.pickupDate)}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Name:</span>
+            <span className="detail-value">{singlePickup.name}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Phone:</span>
+            <span className="detail-value">{singlePickup.phoneNumber}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Items:</span>
+            <span className="detail-value">{singlePickup.items}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Notes:</span>
+            <span className="detail-value">{singlePickup.notes}</span>
+          </div>
+          {singlePickup.image && (
+            <div className="detail-item image-item">
+              <span className="detail-label">Image:</span>
+              <div className="image-container">
+                <img
+                  src={`http://localhost:3000/uploads/${singlePickup.image}`}
+                  alt={singlePickup.items}
+                  className="pickup-image"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="action-buttons">
+          <button onClick={handleDelete} className="delete-button">
+            Delete
+          </button>
+          <button onClick={() => navigate(`/editpickupform/${id}`)} className="edit-button">
+            Edit
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

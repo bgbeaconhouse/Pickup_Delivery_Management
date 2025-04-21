@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import dateAndTime from 'date-and-time';
+import './EditPickupForm.css'; // Import the CSS file
 
 const EditPickupForm = () => {
   const [singlePickup, setSinglePickup] = useState(null);
@@ -102,75 +102,89 @@ const EditPickupForm = () => {
   };
 
   if (error) {
-    return <div style={{ color: 'red' }}>Error: {error}</div>;
+    return <div className="error-container">Error: {error}</div>;
   }
 
   if (!singlePickup) {
-    return <div>Loading pickup details...</div>;
+    return <div className="loading-container">Loading pickup details...</div>;
   }
 
   return (
-    <>
-      <form method='post' onSubmit={handleSubmit} encType="multipart/form-data">
-        <label>
-          Name:{" "}
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </label>
-        <br />
-        <br />
-        <label>
-          Phone:{" "}
-          <input
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-        </label>
-        <br /><br />
-        <label>
-          Items:{" "}
-          <input
-            value={items}
-            onChange={(e) => setItems(e.target.value)}
-          />
-        </label>
-        <br />
-        <br />
-        <label>
-          Image:{" "}
-          <input
-            type="file"
-            name="image"
-            onChange={handleImageChange}
-          />
-          {singlePickup.image && typeof singlePickup.image === 'string' && (
-            <p>Current Image: {singlePickup.image}</p>
-          )}
-        </label>
-        <br /><br />
-        <label>
-          Notes:{" "}
-          <input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </label>
-        <br /><br />
-        <label>
-          Pickup Date:{" "}
-          <input
-            type="date"
-            value={pickupDate}
-            onChange={(e) => setPickupDate(e.target.value)}
-          />
-        </label>
-        <br />
-        <button type="submit">Submit</button>
-        <button onClick={() => navigate(`/viewpickups/${id}`)}>Cancel</button>
-      </form>
-    </>
+    <div className="edit-pickup-form-page">
+      <div className="form-container">
+        <h2 className="form-title">Edit Pickup</h2>
+        <form method='post' onSubmit={handleSubmit} encType="multipart/form-data" className="edit-form">
+          <div className="form-group">
+            <label htmlFor="name" className="form-label">Name:</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="form-input"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="phoneNumber" className="form-label">Phone:</label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="form-input"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="items" className="form-label">Items:</label>
+            <input
+              type="text"
+              id="items"
+              value={items}
+              onChange={(e) => setItems(e.target.value)}
+              className="form-input"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="image" className="form-label">Image:</label>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              onChange={handleImageChange}
+              className="form-input-file"
+            />
+            {singlePickup.image && typeof singlePickup.image === 'string' && (
+              <p className="current-image">Current Image: {singlePickup.image}</p>
+            )}
+          </div>
+          <div className="form-group">
+            <label htmlFor="notes" className="form-label">Notes:</label>
+            <textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="form-textarea"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="pickupDate" className="form-label">Pickup Date:</label>
+            <input
+              type="date"
+              id="pickupDate"
+              value={pickupDate}
+              onChange={(e) => setPickupDate(e.target.value)}
+              className="form-input"
+              required
+            />
+          </div>
+          <div className="form-actions">
+            <button type="submit" className="submit-button">Update</button>
+            <button type="button" onClick={() => navigate(`/viewpickups/${id}`)} className="cancel-button">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

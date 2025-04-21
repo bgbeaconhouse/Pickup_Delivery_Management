@@ -1,0 +1,118 @@
+/* ViewPickups.css */
+.view-pickups-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f4f4f4;
+    min-height: 100vh;
+  }
+  
+  .back-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+  }
+  
+  .back-button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .view-pickups-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .error-message {
+    color: #d32f2f;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    border: 1px solid #ef9a9a;
+  }
+  
+  .view-pickups-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 90%;
+    max-width: 1200px;
+  }
+  
+  .view-pickup-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .pickup-date {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #555;
+  }
+  
+  .pickup-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .pickup-image-container {
+    width: 100%;
+    height: 200px; /* Set a fixed height for the container */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Vertically center the image */
+    margin-bottom: 15px;
+    overflow: hidden;
+    border-radius: 4px;
+    /* border: 1px solid #ddd;  */
+    /* Optional: Add a border around the image area */
+  }
+  
+  .pickup-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Or 'cover' depending on desired effect */
+    display: block;
+  }
+  
+  .pickup-items {
+    margin-bottom: 15px;
+    color: #777;
+  }
+  
+  .see-more-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    align-self: flex-end;
+  }
+  
+  .see-more-button:hover {
+    background-color: #1e7e34;
+  }
