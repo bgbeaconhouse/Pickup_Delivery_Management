@@ -12,7 +12,7 @@ app.use(require("morgan")("dev"));
 const cors = require("cors");
 app.use(cors({ origin: ["http://localhost:5173"] }));
 
-
+app.use('/uploads', express.static('uploads'));
 
 
 app.use("/api", require("./api"));

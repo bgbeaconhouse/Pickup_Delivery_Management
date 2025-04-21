@@ -21,7 +21,11 @@ const ViewPickups = () => {
             console.log(result)
 
 
-            const sortedPickups = result.sort((a, b) => b.id - a.id);
+            const sortedPickups = result.sort((a, b) => {
+              const dateA = new Date(a.pickupDate);
+              const dateB = new Date(b.pickupDate);
+              return dateA - dateB; // Ascending order
+          });
       setPickups(sortedPickups);
           } catch (error) {
             setError(error)
@@ -39,7 +43,7 @@ const ViewPickups = () => {
         const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
         const day = parseInt(parts[2], 10);
         const localDate = new Date(year, month, day);
-        return dateAndTime.format(localDate, 'YYYY-MM-DD');
+        return dateAndTime.format(localDate, 'MM-DD-YY');
       };
    
     return ( 
@@ -51,7 +55,11 @@ const ViewPickups = () => {
                 <h3>Pick Up Date: {formatDate(pickup.pickupDate)}</h3>
                 <h3>Name: {pickup.name}</h3>
                 <h3>Items: {pickup.items}</h3>
-                {pickup.image && <img src={pickup.image} alt={pickup.items} />}
+                {pickup.image && <img
+                src={`http://localhost:3000/uploads/${pickup.image}`} // Construct the image URL
+                alt={pickup.items}
+                style={{ maxWidth: '200px', maxHeight: '200px' }} // Basic styling
+              />}
                 <button onClick={() => navigate(`/viewpickups/${pickup.id}`)}>See More</button>
 
                 </div>

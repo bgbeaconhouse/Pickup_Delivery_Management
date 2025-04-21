@@ -57,7 +57,7 @@ const ViewSinglePickup = () => {
         const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
         const day = parseInt(parts[2], 10);
         const localDate = new Date(year, month, day);
-        return dateAndTime.format(localDate, 'YYYY-MM-DD');
+       return dateAndTime.format(localDate, 'MM-DD-YY');
       };
    
 
@@ -73,7 +73,11 @@ const ViewSinglePickup = () => {
           <h3>Phone: {singlePickup.phoneNumber}</h3>
           <h3>Items: {singlePickup.items}</h3>
           <h3>Notes: {singlePickup.notes}</h3>
-          {singlePickup.image && <img src={singlePickup.image} alt={singlePickup.items} />}
+          {singlePickup.image && <img
+              src={`http://localhost:3000/uploads/${singlePickup.image}`} // Construct the image URL
+              alt={singlePickup.items}
+              style={{ maxWidth: '300px', maxHeight: '300px' }} // Adjust styling as needed
+            />}
          <button onClick={handleDelete}>Delete</button>
          <button onClick={() => navigate(`/editpickupform/${id}`)}>Edit</button>
         </div>

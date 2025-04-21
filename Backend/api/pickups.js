@@ -1,8 +1,27 @@
 const express = require("express")
+
 const router=express.Router()
 router.use(express.json())
-
+const multer = require("multer");
 const prisma = require("../prisma");
+
+
+
+// Configure Multer for disk storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+      // Specify the directory where you want to save the images
+      cb(null, 'uploads/'); // Create an 'uploads' folder in your project directory
+  },
+  filename: function (req, file, cb) {
+      // Define how the file should be named
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const fileExtension = file.originalname.split('.').pop();
+      cb(null, file.fieldname + '-' + uniqueSuffix + '.' + fileExtension);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // Get list of all pickups
 router.get("/", async (req, res, next) => {
@@ -35,34 +54,34 @@ router.get("/", async (req, res, next) => {
       }
     });
 
-      // Add a new pickup
-  router.post("/", async (req, res, next) => {
-   
-    try {
-    
-      const { name, phoneNumber, items, image, notes, pickupDate } = req.body;
-      console.log("request body:",req.body);
-      const date = new Date (pickupDate)
-  
-      
-      if (!name || !phoneNumber || !items || !image || !notes || !pickupDate) {
-    
-        const error = {
-          status: 400,
-          message: "Pick Up is missing essential information.",
-        };
-  
-       
-        return next(error);
+// Add a new pickup
+router.post("/", upload.single('image'), async (req, res, next) => {
+  try {
+      const { name, phoneNumber, items, notes, pickupDate } = req.body;
+      const image = req.file ? req.file.filename : null; // Get the filename of the uploaded image
+
+      console.log("request body:", req.body);
+      console.log("uploaded file:", req.file); // Log the uploaded file information
+      const date = new Date(pickupDate);
+
+      if (!name || !phoneNumber || !items || !notes || !pickupDate) {
+          const error = {
+              status: 400,
+              message: "Pick Up is missing essential information.",
+          };
+          return next(error);
       }
-     
-      const pickup = await prisma.pickup.create({ data: { name, phoneNumber, items, image, notes, pickupDate: date } });
-      console.log(pickup)
+
+      const pickup = await prisma.pickup.create({
+          data: { name, phoneNumber, items, image, notes, pickupDate: date },
+      });
+      console.log(pickup);
       res.status(201).json(pickup);
-    } catch {
-      next();
-    }
-  });
+  } catch (error) {
+      console.error("Error creating pickup:", error);
+      next(error); // Pass the error to the error handling middleware
+  }
+});
 
   // Delete pickup
   router.delete("/:id", async (req, res, next) => {
@@ -87,38 +106,38 @@ router.get("/", async (req, res, next) => {
   });
 
 // Update pickup
-router.put("/:id", async (req, res, next) => {
+router.put("/:id", upload.single('image'), async (req, res, next) => {
   try {
-    const id = +req.params.id;
+      const id = +req.params.id;
 
-    
-    const pickupExists = await prisma.pickup.findUnique({ where: { id } });
-    if (!pickupExists) {
-      return next({
-        status: 404,
-        message: `Could not find pickup with id ${id}.`,
+      const pickupExists = await prisma.pickup.findUnique({ where: { id } });
+      if (!pickupExists) {
+          return next({
+              status: 404,
+              message: `Could not find pickup with id ${id}.`,
+          });
+      }
+
+      const { name, phoneNumber, items, notes, pickupDate } = req.body;
+      const image = req.file ? req.file.filename : pickupExists.image; // Use existing image if no new one is uploaded
+      const date = new Date(pickupDate);
+
+      if (!name || !phoneNumber || !items || !notes || !pickupDate) {
+          return next({
+              status: 400,
+              message: "Pickup is missing essential information.",
+          });
+      }
+
+      const pickup = await prisma.pickup.update({
+          where: { id },
+          data: { name, phoneNumber, items, image, notes, pickupDate: date },
       });
-    }
 
-    
-    const { name, phoneNumber, items, image, notes, pickupDate } = req.body;
-    const date = new Date (pickupDate)
-    if (!name || !phoneNumber || !items || !image || !notes || !pickupDate) {
-      return next({
-        status: 400,
-        message: "Pickup is missing essential information.",
-      });
-    }
-
-  
-    const pickup = await prisma.pickup.update({
-      where: { id },
-      data: { name, phoneNumber, items, image, notes, pickupDate: date },
-    });
-
-    res.json(pickup);
-  } catch {
-    next();
+      res.json(pickup);
+  } catch (error) {
+      console.error("Error updating pickup:", error);
+      next(error); // Pass the error to the error handling middleware
   }
 });
 
