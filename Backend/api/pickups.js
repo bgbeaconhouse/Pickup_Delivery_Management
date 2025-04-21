@@ -5,7 +5,7 @@ router.use(express.json())
 const multer = require("multer");
 const prisma = require("../prisma");
 
-
+const verifyToken = require("../verify")
 
 // Configure Multer for disk storage
 const storage = multer.diskStorage({
@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Get list of all pickups
-router.get("/", async (req, res, next) => {
+router.get("/", verifyToken, async (req, res, next) => {
     try {
       const pickups = await prisma.pickup.findMany();
       res.json(pickups);
@@ -35,7 +35,7 @@ router.get("/", async (req, res, next) => {
   });
 
     // Get a specific pickup
-    router.get("/:id", async (req, res, next) => {
+    router.get("/:id", verifyToken, async (req, res, next) => {
       try {
         const id = +req.params.id;
     
@@ -55,7 +55,7 @@ router.get("/", async (req, res, next) => {
     });
 
 // Add a new pickup
-router.post("/", upload.single('image'), async (req, res, next) => {
+router.post("/", verifyToken, upload.single('image'), async (req, res, next) => {
   try {
       const { name, phoneNumber, items, notes, pickupDate } = req.body;
       const image = req.file ? req.file.filename : null; // Get the filename of the uploaded image
@@ -84,7 +84,7 @@ router.post("/", upload.single('image'), async (req, res, next) => {
 });
 
   // Delete pickup
-  router.delete("/:id", async (req, res, next) => {
+  router.delete("/:id", verifyToken, async (req, res, next) => {
     
     try {
       const id = +req.params.id;
@@ -106,7 +106,7 @@ router.post("/", upload.single('image'), async (req, res, next) => {
   });
 
 // Update pickup
-router.put("/:id", upload.single('image'), async (req, res, next) => {
+router.put("/:id", verifyToken, upload.single('image'), async (req, res, next) => {
   try {
       const id = +req.params.id;
 

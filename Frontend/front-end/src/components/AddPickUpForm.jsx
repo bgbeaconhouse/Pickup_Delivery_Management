@@ -8,7 +8,7 @@ const AddPickupForm = () => {
   const [image, setImage] = useState(null);
   const [notes, setNotes] = useState("");
   const [pickupDate, setPickupDate] = useState("");
-  const [errors, setErrors] = useState({}); // State to hold validation errors
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
@@ -30,9 +30,10 @@ const AddPickupForm = () => {
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      return; // Stop submission if there are errors
+      return;
     }
 
+    const token = localStorage.getItem('token'); // Retrieve the token
     const formData = new FormData();
     formData.append("name", name);
     formData.append("phoneNumber", phoneNumber);
@@ -42,26 +43,32 @@ const AddPickupForm = () => {
     formData.append("pickupDate", pickupDate);
 
     try {
-      const result = await fetch("http://localhost:3000/api/pickups", {
+      const response = await fetch("http://localhost:3000/api/pickups", {
         method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`, // Include the token in the headers
+        },
         body: formData,
       });
 
-      if (result.ok) {
+      if (response.ok) {
         console.log("Pickup added successfully!");
         navigate("/viewpickups/");
+      } else if (response.status === 401 || response.status === 403) {
+        console.error("Unauthorized to add pickup");
+        setErrors({ general: "Unauthorized to add a new pickup. Please log in." });
       } else {
-        const errorData = await result.json();
+        const errorData = await response.json();
         console.error("Error adding pickup:", errorData);
-        // Optionally set a general error message in state
+        setErrors({ general: "Failed to add pickup." }); // Set a general error message
       }
     } catch (error) {
       console.error("Fetch error:", error.message);
-      // Optionally set a network error message in state
+      setErrors({ general: "Network error. Please try again." }); // Set a network error message
     }
 
-    // Clear the form fields only on successful submission
-    if (Object.keys(errors).length === 0) {
+    // Clear the form fields only on successful submission (no general error)
+    if (!errors.general && Object.keys(validationErrors).length === 0) {
       setName("");
       setPhoneNumber("");
       setItems("");
@@ -73,7 +80,6 @@ const AddPickupForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // Clear the specific error when the user starts typing in that field
     setErrors(prevErrors => ({ ...prevErrors, [name]: "" }));
     switch (name) {
       case "name":
@@ -102,6 +108,7 @@ const AddPickupForm = () => {
   return (
     <>
       <form method='post' onSubmit={handleSubmit} encType="multipart/form-data">
+        {errors.general && <p className="error-message">{errors.general}</p>} {/* Display general error */}
         <label>
           Name:{" "}
           <input
