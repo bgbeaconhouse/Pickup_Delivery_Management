@@ -12,11 +12,11 @@ const Home = () => {
         <button onClick={() => navigate("/viewpickups")} className="home-button view-pickups">
           View Pick Ups
         </button>
-        <button className="home-button view-deliveries">View Deliveries</button>
+        <button onClick={() => navigate("/viewdeliveries")} className="home-button view-deliveries">View Deliveries</button>
         <button onClick={() => navigate("/addpickupform")} className="home-button create-pickup">
           Create New Pick Up
         </button>
-        <button className="home-button create-delivery">Create New Delivery</button>
+        <button onClick={() => navigate("/adddeliveryform")} className="home-button create-delivery">Create New Delivery</button>
       </div>
     </div>
   );
