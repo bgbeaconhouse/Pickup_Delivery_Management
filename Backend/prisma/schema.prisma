@@ -19,7 +19,7 @@ model Pickup {
   name String
   phoneNumber String
   items String 
-  image String
+  images String[]
   notes String
   pickupDate DateTime 
 }
@@ -30,7 +30,7 @@ model Delivery {
   phoneNumber String
   address String
   items String 
-  image String
+  images String[]
   notes String
   deliveryDate DateTime 
 }

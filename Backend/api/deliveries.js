@@ -4,6 +4,7 @@ router.use(express.json())
 const multer = require("multer");
 
 const prisma = require("../prisma");
+const fs = require('fs').promises;
 const verifyToken = require("../verify")
 
 // Configure Multer for disk storage
@@ -20,7 +21,8 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage }).array('images', 10); 
+const uploadSingle = multer({ storage: storage }).single('image');
 
 
 
@@ -57,13 +59,13 @@ router.get("/:id", verifyToken, async (req, res, next) => {
 
 
 // Add a new delivery
-router.post("/", verifyToken, upload.single('image'), async (req, res, next) => {
+router.post("/", verifyToken, upload, async (req, res, next) => {
   try {
       const { name, phoneNumber, address, items, notes, deliveryDate } = req.body;
-      const image = req.file ? req.file.filename : null; // Get the filename of the uploaded image
+      const images = req.files ? req.files.map(file => file.filename) : []; // Get the filename of the uploaded image
 
       console.log("request body:", req.body);
-      console.log("uploaded file:", req.file); // Log the uploaded file information
+      console.log("uploaded file:", req.files); // Log the uploaded file information
       const date = new Date(deliveryDate);
 
       if (!name || !phoneNumber || !address || !items || !notes || !deliveryDate) {
@@ -75,7 +77,7 @@ router.post("/", verifyToken, upload.single('image'), async (req, res, next) => 
       }
 
       const delivery = await prisma.delivery.create({
-          data: { name, phoneNumber, address, items, image, notes, deliveryDate: date },
+          data: { name, phoneNumber, address, items, images, notes, deliveryDate: date },
       });
       console.log(delivery);
       res.status(201).json(delivery);
@@ -108,8 +110,9 @@ router.delete("/:id", verifyToken, async (req, res, next) => {
   }
 });
 
+const uploadNewImages = multer({ storage: storage }).array('newImages', 5);
 // Update pickup
-router.put("/:id", verifyToken, upload.single('image'), async (req, res, next) => {
+router.put("/:id", verifyToken, uploadNewImages, async (req, res, next) => {
   try {
       const id = +req.params.id;
 
@@ -121,8 +124,9 @@ router.put("/:id", verifyToken, upload.single('image'), async (req, res, next) =
           });
       }
 
-      const { name, phoneNumber, address, items, notes, deliveryDate } = req.body;
-      const image = req.file ? req.file.filename : deliveryExists.image; // Use existing image if no new one is uploaded
+      const { name, phoneNumber, address, items, notes, deliveryDate, existingImages } = req.body;
+      const newImageFiles = req.files || [];
+      const newImageFilenames = newImageFiles.map(file => file.filename);
       const date = new Date(deliveryDate);
 
       if (!name || !phoneNumber || !address || !items || !notes || !deliveryDate) {
@@ -132,9 +136,13 @@ router.put("/:id", verifyToken, upload.single('image'), async (req, res, next) =
           });
       }
 
+  // Determine the final array of images to store
+  const imagesToKeep = Array.isArray(existingImages) ? existingImages : (existingImages ? [existingImages] : []);
+  const finalImages = [...imagesToKeep, ...newImageFilenames];
+
       const delivery = await prisma.delivery.update({
           where: { id },
-          data: { name, phoneNumber, address, items, image, notes, deliveryDate: date },
+          data: { name, phoneNumber, address, items, images: finalImages, notes, deliveryDate: date },
       });
 
       res.json(delivery);

@@ -127,15 +127,20 @@ const ViewSingleDelivery = () => {
             <span className="detail-label">Notes:</span>
             <span className="detail-value">{singleDelivery.notes}</span>
           </div>
-          {singleDelivery.image && (
+          {singleDelivery.images && singleDelivery.images.length > 0 && (
             <div className="detail-item image-item">
-              <span className="detail-label">Image:</span>
-              <div className="image-container">
-                <img
-                  src={`http://localhost:3000/uploads/${singleDelivery.image}`}
-                  alt={singleDelivery.items}
-                  className="pickup-image"
-                />
+              <span className="detail-label">Images:</span>
+              <div className="images-container">
+                {singleDelivery.images.map((imageName, index) => (
+                  <div key={index} className="image-container">
+                    <img
+                      src={`http://localhost:3000/uploads/${imageName}`}
+                      alt={`${singleDelivery.items}-${index}`}
+                      className="pickup-image"
+                      style={{ maxWidth: '200px', maxHeight: '200px', margin: '10px' }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}

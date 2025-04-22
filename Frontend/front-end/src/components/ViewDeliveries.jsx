@@ -72,10 +72,10 @@ const ViewDeliveries = () => {
           <div className="view-pickup-card" key={delivery.id}>
             <h3 className="pickup-date">Delivery: {formatDate(delivery.deliveryDate)}</h3>
             <h4 className="pickup-name">{delivery.name}</h4>
-            {delivery.image && (
+            {delivery.images && delivery.images.length > 0 && (
               <div className="pickup-image-container">
                 <img
-                  src={`http://localhost:3000/uploads/${delivery.image}`}
+                  src={`http://localhost:3000/uploads/${delivery.images[0]}`}
                   alt={delivery.items}
                   className="pickup-image"
                 />

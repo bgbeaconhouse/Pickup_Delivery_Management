@@ -122,15 +122,20 @@ const ViewSinglePickup = () => {
             <span className="detail-label">Notes:</span>
             <span className="detail-value">{singlePickup.notes}</span>
           </div>
-          {singlePickup.image && (
+          {singlePickup.images && singlePickup.images.length > 0 && (
             <div className="detail-item image-item">
-              <span className="detail-label">Image:</span>
-              <div className="image-container">
-                <img
-                  src={`http://localhost:3000/uploads/${singlePickup.image}`}
-                  alt={singlePickup.items}
-                  className="pickup-image"
-                />
+              <span className="detail-label">Images:</span>
+              <div className="images-container">
+                {singlePickup.images.map((imageName, index) => (
+                  <div key={index} className="image-container">
+                    <img
+                      src={`http://localhost:3000/uploads/${imageName}`}
+                      alt={`${singlePickup.items}-${index}`}
+                      className="pickup-image"
+                      style={{ maxWidth: '200px', maxHeight: '200px', margin: '10px' }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}

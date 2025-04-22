@@ -9,7 +9,8 @@ const EditPickupForm = () => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [items, setItems] = useState("");
-  const [image, setImage] = useState(null);
+  const [newImages, setNewImages] = useState([]); // New images to add
+  const [existingImages, setExistingImages] = useState([]);
   const [notes, setNotes] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const EditPickupForm = () => {
         setName(result.name);
         setPhoneNumber(result.phoneNumber);
         setItems(result.items);
-        setImage(result.image);
+        setExistingImages(result.images || []);
         setNotes(result.notes);
         if (result.pickupDate) {
           const utcDatePart = result.pickupDate.substring(0, 10);
@@ -61,14 +62,15 @@ const EditPickupForm = () => {
     formData.append("name", name);
     formData.append("phoneNumber", phoneNumber);
     formData.append("items", items);
+    newImages.forEach((image) => {
+      formData.append("newImages", image); // Use a different field name
+    });
     formData.append("notes", notes);
     formData.append("pickupDate", pickupDate);
-
-    if (image instanceof File) {
-      formData.append("image", image);
-    } else if (typeof image === 'string') {
-      formData.append("image", image); // Send existing filename if no new file
-    }
+    existingImages.forEach((image) => {
+      formData.append("existingImages", image); // Send existing images
+    });
+  
 
     try {
       const response = await fetch(`http://localhost:3000/api/pickups/${id}`, {
@@ -96,9 +98,12 @@ const EditPickupForm = () => {
     }
   }
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
+  const handleNewImageChange = (e) => {
+    setNewImages([...e.target.files]);
+  };
+
+  const handleRemoveExistingImage = (imageName) => {
+    setExistingImages(existingImages.filter((img) => img !== imageName));
   };
 
   if (error) {
@@ -146,18 +151,56 @@ const EditPickupForm = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="image" className="form-label">Image:</label>
+            <label htmlFor="newImages" className="form-label">Add New Images:</label>
             <input
               type="file"
-              id="image"
-              name="image"
-              onChange={handleImageChange}
+              id="newImages"
+              name="newImages"
+              onChange={handleNewImageChange}
               className="form-input-file"
+              multiple
             />
-            {singlePickup.image && typeof singlePickup.image === 'string' && (
-              <p className="current-image">Current Image: {singlePickup.image}</p>
+            {newImages.length > 0 && (
+              <div className="image-preview-container">
+                {Array.from(newImages).map((image, index) => (
+                  <img
+                    key={index}
+                    src={URL.createObjectURL(image)}
+                    alt={`new-preview-${index}`}
+                    className="image-preview"
+                    style={{ maxWidth: '100px', maxHeight: '100px', margin: '5px' }}
+                  />
+                ))}
+              </div>
             )}
           </div>
+          <div className="form-group">
+            <label className="form-label">Current Images:</label>
+            {existingImages.length > 0 ? (
+              <div className="existing-images-container">
+                {existingImages.map((imageName, index) => (
+                  <div key={index} className="existing-image-item">
+                    <img
+                      src={`http://localhost:3000/uploads/${imageName}`}
+                      alt={`existing-${index}`}
+                      className="existing-image"
+                      style={{ maxWidth: '100px', maxHeight: '100px', margin: '5px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExistingImage(imageName)}
+                      className="remove-image-button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No images currently uploaded.</p>
+            )}
+          </div>
+
           <div className="form-group">
             <label htmlFor="notes" className="form-label">Notes:</label>
             <textarea

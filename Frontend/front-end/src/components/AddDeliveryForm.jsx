@@ -8,7 +8,7 @@ const AddDeliveryForm = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [address, setAddress] = useState("");
   const [items, setItems] = useState("");
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [notes, setNotes] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [errors, setErrors] = useState({});
@@ -45,7 +45,9 @@ const AddDeliveryForm = () => {
     formData.append("phoneNumber", phoneNumber);
     formData.append("address", address);
     formData.append("items", items);
-    formData.append("image", image);
+    images.forEach((image) => { // Append each image
+      formData.append("images", image);
+    });
     formData.append("notes", notes);
     formData.append("deliveryDate", deliveryDate);
 
@@ -80,7 +82,7 @@ const AddDeliveryForm = () => {
       setPhoneNumber("");
       setAddress("");
       setItems("");
-      setImage(null);
+      setImages([]);
       setNotes("");
       setDeliveryDate("");
     }
@@ -102,8 +104,8 @@ const AddDeliveryForm = () => {
       case "items":
         setItems(value);
         break;
-      case "image":
-        setImage(e.target.files[0]);
+      case "images":
+        setImages([...e.target.files]);
         break;
       case "notes":
         setNotes(value);
@@ -175,14 +177,28 @@ const AddDeliveryForm = () => {
             {errors.items && <p className="error-message">{errors.items}</p>}
           </div>
           <div className="form-group">
-            <label htmlFor="image" className="form-label">Image:</label>
+            <label htmlFor="images" className="form-label">Images:</label>
             <input
               type="file"
-              id="image"
-              name="image"
+              id="images"
+              name="images"
               onChange={handleInputChange}
               className="form-input-file"
+              multiple
             />
+               {images.length > 0 && (
+              <div className="image-preview-container">
+                {Array.from(images).map((image, index) => (
+                  <img
+                    key={index}
+                    src={URL.createObjectURL(image)}
+                    alt={`preview-${index}`}
+                    className="image-preview"
+                    style={{ maxWidth: '100px', maxHeight: '100px', margin: '5px' }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
           <div className="form-group">
             <label htmlFor="notes" className="form-label">Notes:</label>

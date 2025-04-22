@@ -4,6 +4,7 @@ const router=express.Router()
 router.use(express.json())
 const multer = require("multer");
 const prisma = require("../prisma");
+const fs = require('fs').promises;
 
 const verifyToken = require("../verify")
 
@@ -21,7 +22,8 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage }).array('images', 10); 
+const uploadSingle = multer({ storage: storage }).single('image');
 
 // Get list of all pickups
 router.get("/", verifyToken, async (req, res, next) => {
@@ -55,13 +57,13 @@ router.get("/", verifyToken, async (req, res, next) => {
     });
 
 // Add a new pickup
-router.post("/", verifyToken, upload.single('image'), async (req, res, next) => {
+router.post("/", verifyToken, upload, async (req, res, next) => {
   try {
       const { name, phoneNumber, items, notes, pickupDate } = req.body;
-      const image = req.file ? req.file.filename : null; // Get the filename of the uploaded image
+      const images = req.files ? req.files.map(file => file.filename) : []; // Get the filename of the uploaded image
 
       console.log("request body:", req.body);
-      console.log("uploaded file:", req.file); // Log the uploaded file information
+      console.log("uploaded files:", req.files); // Log the uploaded file information
       const date = new Date(pickupDate);
 
       if (!name || !phoneNumber || !items || !notes || !pickupDate) {
@@ -73,7 +75,7 @@ router.post("/", verifyToken, upload.single('image'), async (req, res, next) => 
       }
 
       const pickup = await prisma.pickup.create({
-          data: { name, phoneNumber, items, image, notes, pickupDate: date },
+          data: { name, phoneNumber, items, images, notes, pickupDate: date },
       });
       console.log(pickup);
       res.status(201).json(pickup);
@@ -105,40 +107,42 @@ router.post("/", verifyToken, upload.single('image'), async (req, res, next) => 
     }
   });
 
-// Update pickup
-router.put("/:id", verifyToken, upload.single('image'), async (req, res, next) => {
-  try {
-      const id = +req.params.id;
+  const uploadNewImages = multer({ storage: storage }).array('newImages', 5); // For adding new images
 
+  // Update pickup
+  router.put("/:id", verifyToken, uploadNewImages, async (req, res, next) => {
+    try {
+      const id = +req.params.id;
+  
       const pickupExists = await prisma.pickup.findUnique({ where: { id } });
       if (!pickupExists) {
-          return next({
-              status: 404,
-              message: `Could not find pickup with id ${id}.`,
-          });
+        return next({ status: 404, message: `Could not find pickup with id ${id}.` });
       }
-
-      const { name, phoneNumber, items, notes, pickupDate } = req.body;
-      const image = req.file ? req.file.filename : pickupExists.image; // Use existing image if no new one is uploaded
+  
+      const { name, phoneNumber, items, notes, pickupDate, existingImages } = req.body;
+      const newImageFiles = req.files || [];
+      const newImageFilenames = newImageFiles.map(file => file.filename);
+  
       const date = new Date(pickupDate);
-
-      if (!name || !phoneNumber || !items || !notes || !pickupDate) {
-          return next({
-              status: 400,
-              message: "Pickup is missing essential information.",
-          });
+  
+      if (!name || !phoneNumber || !items || !pickupDate) {
+        return next({ status: 400, message: "Pickup is missing essential information." });
       }
-
+  
+      // Determine the final array of images to store
+      const imagesToKeep = Array.isArray(existingImages) ? existingImages : (existingImages ? [existingImages] : []);
+      const finalImages = [...imagesToKeep, ...newImageFilenames];
+  
       const pickup = await prisma.pickup.update({
-          where: { id },
-          data: { name, phoneNumber, items, image, notes, pickupDate: date },
+        where: { id },
+        data: { name, phoneNumber, items, images: finalImages, notes, pickupDate: date },
       });
-
+  
       res.json(pickup);
-  } catch (error) {
+    } catch (error) {
       console.error("Error updating pickup:", error);
-      next(error); // Pass the error to the error handling middleware
-  }
-});
+      next(error);
+    }
+  });
 
   module.exports = router;
