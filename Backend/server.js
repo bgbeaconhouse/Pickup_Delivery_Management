@@ -12,6 +12,7 @@ app.use(require("morgan")("dev"));
 const cors = require("cors");
 app.use(cors({ origin: ["http://localhost:5173", "https://pickup-delivery-gspc.onrender.com"] }));
 
+app.use(express.static(path.join(__dirname, "../Frontend/front-end/dist")))
 app.use('/uploads', express.static('uploads'));
 
 
@@ -58,4 +59,8 @@ app.use((err, req, res, next) => {
 
   app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}.`);
+  });
+
+  app.get('*', (req, res, next) => {
+    res.sendFile(path.join(__dirname, "../Frontend/front-end/dist", 'index.html'));
   });
