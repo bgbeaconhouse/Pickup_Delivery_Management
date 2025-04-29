@@ -12,7 +12,7 @@ const ViewDeliveries = () => {
     async function fetchDeliveries() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch("http://localhost:3000/api/deliveries", {
+        const response = await fetch("https://pickup-delivery-gspc.onrender.com/api/deliveries", {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -75,7 +75,7 @@ const ViewDeliveries = () => {
             {delivery.images && delivery.images.length > 0 && (
               <div className="pickup-image-container">
                 <img
-                  src={`http://localhost:3000/uploads/${delivery.images[0]}`}
+                  src={`https://pickup-delivery-gspc.onrender.com/uploads/${delivery.images[0]}`}
                   alt={delivery.items}
                   className="pickup-image"
                 />

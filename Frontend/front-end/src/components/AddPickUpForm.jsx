@@ -46,7 +46,7 @@ const AddPickupForm = () => {
     formData.append("pickupDate", pickupDate);
 
     try {
-      const response = await fetch("http://localhost:3000/api/pickups", {
+      const response = await fetch("https://pickup-delivery-gspc.onrender.com/api/pickups", {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${token}`, // Include the token in the headers

@@ -13,7 +13,7 @@ const ViewSinglePickup = () => {
     async function fetchSinglePickup() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/pickups/${id}`, {
+        const response = await fetch(`https://pickup-delivery-gspc.onrender.com/api/pickups/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -47,7 +47,7 @@ const ViewSinglePickup = () => {
     if (window.confirm("Are you sure you want to delete this pickup?")) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/pickups/${id}`, {
+        const response = await fetch(`https://pickup-delivery-gspc.onrender.com/api/pickups/${id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -129,7 +129,7 @@ const ViewSinglePickup = () => {
                 {singlePickup.images.map((imageName, index) => (
                   <div key={index} className="image-container">
                     <img
-                      src={`http://localhost:3000/uploads/${imageName}`}
+                      src={`https://pickup-delivery-gspc.onrender.com/uploads/${imageName}`}
                       alt={`${singlePickup.items}-${index}`}
                       className="pickup-image"
                       style={{ maxWidth: '200px', maxHeight: '200px', margin: '10px' }}

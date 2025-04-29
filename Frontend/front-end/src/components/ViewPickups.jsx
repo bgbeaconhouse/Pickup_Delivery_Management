@@ -12,7 +12,7 @@ const ViewPickups = () => {
     async function fetchPickups() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch("http://localhost:3000/api/pickups", {
+        const response = await fetch("https://pickup-delivery-gspc.onrender.com/api/pickups", {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -75,7 +75,7 @@ const ViewPickups = () => {
             {pickup.images && pickup.images.length > 0 && (
               <div className="pickup-image-container">
                 <img
-                  src={`http://localhost:3000/uploads/${pickup.images[0]}`}
+                  src={`https://pickup-delivery-gspc.onrender.com/uploads/${pickup.images[0]}`}
                   alt={pickup.items}
                   className="pickup-image"
                 />

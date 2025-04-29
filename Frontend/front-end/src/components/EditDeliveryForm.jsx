@@ -21,7 +21,7 @@ const EditDeliveryForm = () => {
     async function fetchSingleDelivery() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/deliveries/${id}`, {
+        const response = await fetch(`https://pickup-delivery-gspc.onrender.com/api/deliveries/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -77,7 +77,7 @@ const EditDeliveryForm = () => {
   
 
     try {
-      const response = await fetch(`http://localhost:3000/api/deliveries/${id}`, {
+      const response = await fetch(`https://pickup-delivery-gspc.onrender.com/api/deliveries/${id}`, {
         method: "PUT",
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -195,7 +195,7 @@ const EditDeliveryForm = () => {
                 {existingImages.map((imageName, index) => (
                   <div key={index} className="existing-image-item">
                     <img
-                      src={`http://localhost:3000/uploads/${imageName}`}
+                      src={`https://pickup-delivery-gspc.onrender.com/uploads/${imageName}`}
                       alt={`existing-${index}`}
                       className="existing-image"
                       style={{ maxWidth: '100px', maxHeight: '100px', margin: '5px' }}

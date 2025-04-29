@@ -1,16 +1,16 @@
-require("dotenv").config()
+// require("dotenv").config()
 
 const express = require("express");
 const app = express();
 
 const prisma = require("./prisma")
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(require("morgan")("dev"));
 const cors = require("cors");
-app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(cors({ origin: ["http://localhost:5173", "https://pickup-delivery-gspc.onrender.com"] }));
 
 app.use('/uploads', express.static('uploads'));
 
