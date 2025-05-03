@@ -1,3 +1,6 @@
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css'; // Optional: Import CSS for a blur effect
+
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import dateAndTime from 'date-and-time';
@@ -74,10 +77,11 @@ const ViewDeliveries = () => {
             <h4 className="pickup-name">{delivery.name}</h4>
             {delivery.images && delivery.images.length > 0 && (
               <div className="pickup-image-container">
-                <img
+                <LazyLoadImage
                   src={`https://pickup-delivery-gspc.onrender.com/uploads/${delivery.images[0]}`}
                   alt={delivery.items}
                   className="pickup-image"
+                  effect="blur"
                 />
               </div>
             )}

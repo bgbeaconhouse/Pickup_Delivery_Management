@@ -4,29 +4,26 @@ router.use(express.json());
 const multer = require("multer");
 const prisma = require("../prisma");
 const fs = require('fs').promises;
-const path = require('path'); // Import the 'path' module
+const path = require('path');
+const sharp = require('sharp'); // Import the sharp library
 
 const verifyToken = require("../verify");
 
 // Configure Multer for disk storage
-const mountPath = '/mnt/disks/data'; // Your chosen mount path
-const uploadSubdirectory = 'uploads'; // Choose a subdirectory (e.g., 'deliveries')
-const diskStoragePath = path.join(mountPath, uploadSubdirectory); // Combine them
+const mountPath = '/mnt/disks/data';
+const uploadSubdirectory = 'uploads';
+const diskStoragePath = path.join(mountPath, uploadSubdirectory);
 
 const storage = multer.diskStorage({
     destination: async function (req, file, cb) {
-        // Use async/await for better error handling with fs.mkdir
         try {
-            // Ensure the directory exists (recursively)
             await fs.mkdir(diskStoragePath, { recursive: true });
-            cb(null, diskStoragePath); // Pass the full path to multer
+            cb(null, diskStoragePath);
         } catch (error) {
-            // Handle errors during directory creation
             cb(error);
         }
     },
     filename: function (req, file, cb) {
-        // Define how the file should be named
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const fileExtension = file.originalname.split('.').pop();
         cb(null, file.fieldname + '-' + uniqueSuffix + '.' + fileExtension);
@@ -70,10 +67,29 @@ router.get("/:id", verifyToken, async (req, res, next) => {
 router.post("/", verifyToken, upload, async (req, res, next) => {
     try {
         const { name, phoneNumber, address, items, notes, deliveryDate } = req.body;
-        const images = req.files ? req.files.map(file => file.filename) : []; // Get the filename of the uploaded image
+        const images = []; // Array to store processed image filenames
 
-        console.log("request body:", req.body);
-        console.log("uploaded file:", req.files); // Log the uploaded file information
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                const fileExtension = file.originalname.split('.').pop();
+                const baseFileName = file.fieldname + '-' + uniqueSuffix;
+                const fullFileName = `${baseFileName}.${fileExtension}`;
+                const thumbFileName = `thumb_${baseFileName}.${fileExtension}`;
+
+                // Resize and save using sharp
+                await sharp(file.path)
+                    .resize({ width: 800 }) // Example: Medium size - Adjust as needed
+                    .toFile(path.join(diskStoragePath, fullFileName));
+
+                await sharp(file.path)
+                    .resize({ width: 200 }) // Example: Thumbnail size - Adjust as needed
+                    .toFile(path.join(diskStoragePath, thumbFileName));
+
+                images.push(fullFileName); // Store the filename of the medium image
+            }
+        }
+
         const date = new Date(deliveryDate);
 
         if (!name || !phoneNumber || !address || !items || !notes || !deliveryDate) {
@@ -133,8 +149,30 @@ router.put("/:id", verifyToken, uploadNewImages, async (req, res, next) => {
 
         const { name, phoneNumber, address, items, notes, deliveryDate, existingImages } = req.body;
         const newImageFiles = req.files || [];
-        const newImageFilenames = newImageFiles.map(file => file.filename);
+        const newImageFilenames = [];
+
+        if (newImageFiles && newImageFiles.length > 0) {
+            for (const file of newImageFiles) {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                const fileExtension = file.originalname.split('.').pop();
+                const baseFileName = `newImage-${uniqueSuffix}`;
+                const fullFileName = `${baseFileName}.${fileExtension}`;
+                const thumbFileName = `thumb_${baseFileName}.${fileExtension}`;
+
+                await sharp(file.path)
+                    .resize({ width: 800 })
+                    .toFile(path.join(diskStoragePath, fullFileName));
+                await sharp(file.path)
+                    .resize({ width: 200 })
+                    .toFile(path.join(diskStoragePath, thumbFileName));
+                newImageFilenames.push(fullFileName);
+            }
+        }
+
         const date = new Date(deliveryDate);
+        const imagesToKeep = Array.isArray(existingImages) ? existingImages : (existingImages ? [existingImages] : []);
+        const finalImages = [...imagesToKeep, ...newImageFilenames];
+
 
         if (!name || !phoneNumber || !address || !items || !notes || !deliveryDate) {
             return next({
@@ -142,10 +180,6 @@ router.put("/:id", verifyToken, uploadNewImages, async (req, res, next) => {
                 message: "Delivery is missing essential information.",
             });
         }
-
-        // Determine the final array of images to store
-        const imagesToKeep = Array.isArray(existingImages) ? existingImages : (existingImages ? [existingImages] : []);
-        const finalImages = [...imagesToKeep, ...newImageFilenames];
 
         const delivery = await prisma.delivery.update({
             where: { id },
@@ -160,4 +194,5 @@ router.put("/:id", verifyToken, uploadNewImages, async (req, res, next) => {
 });
 
 module.exports = router;
+
 
