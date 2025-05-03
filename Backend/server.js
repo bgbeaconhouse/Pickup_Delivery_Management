@@ -13,7 +13,7 @@ const cors = require("cors");
 app.use(cors({ origin: ["http://localhost:5173", "https://pickup-delivery-gspc.onrender.com"] }));
 
 app.use(express.static(path.join(__dirname, "../Frontend/front-end/dist")))
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join('/mnt', 'disks', 'data', 'uploads')));
 
 
 
