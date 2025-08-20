@@ -1,4 +1,4 @@
-/* ViewSinglePickup.css */
+/* Temporary Debug CSS - ViewSinglePickup.css */
 .view-single-pickup-page {
     display: flex;
     flex-direction: column;
@@ -60,7 +60,7 @@
   .detail-label {
     font-weight: bold;
     color: #555;
-    width: 120px; /* Adjust as needed for label width */
+    width: 120px;
     margin-right: 10px;
   }
   
@@ -79,9 +79,9 @@
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    width: 100%; /* Make image container responsive */
-    max-width: 300px; /* Limit maximum image width */
-    height: auto; /* Adjust height automatically */
+    width: 100%;
+    max-width: 300px;
+    height: auto;
   }
   
   .pickup-image {
@@ -90,57 +90,51 @@
     height: auto;
   }
   
+  /* VERY VISIBLE ACTION BUTTONS FOR DEBUGGING */
   .action-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
+    background-color: yellow !important;
+    border: 5px solid red !important;
+    padding: 30px !important;
+    margin: 30px 0 !important;
+    display: flex !important;
+    gap: 15px !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .action-buttons::before {
+    content: "BUTTONS SHOULD BE HERE:";
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
   }
   
   .delete-button,
   .edit-button,
   .convert-button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    min-width: 120px;
+    background-color: purple !important;
+    color: white !important;
+    border: 3px solid black !important;
+    padding: 20px 30px !important;
+    font-size: 1.2rem !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    min-width: 150px !important;
+    height: 60px !important;
   }
   
-  .delete-button {
-    background-color: #dc3545;
-    color: white;
-  }
-  
-  .delete-button:hover {
-    background-color: #c82333;
-  }
-  
-  .edit-button {
-    background-color: #ffc107;
-    color: #333;
-  }
-  
-  .edit-button:hover {
-    background-color: #e0a800;
-  }
-  
-  .convert-button {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .convert-button:hover:not(:disabled) {
-    background-color: #0056b3;
+  .delete-button:hover,
+  .edit-button:hover,
+  .convert-button:hover {
+    background-color: orange !important;
   }
   
   .convert-button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.6;
+    background-color: gray !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
   }
   
   .loading-container {
