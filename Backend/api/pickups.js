@@ -189,5 +189,43 @@ router.put("/:id", verifyToken, uploadNewImages, async (req, res, next) => {
     }
 });
 
+// Convert pickup to delivery
+router.post("/:id/convert-to-delivery", verifyToken, async (req, res, next) => {
+  try {
+    const pickupId = +req.params.id;
+    
+    // Get the pickup data
+    const pickup = await prisma.pickup.findUnique({ 
+      where: { id: pickupId } 
+    });
+    
+    if (!pickup) {
+      return next({
+        status: 404,
+        message: `Could not find pickup with id ${pickupId}.`,
+      });
+    }
+
+    // Create delivery from pickup data
+    const delivery = await prisma.delivery.create({
+      data: {
+        name: pickup.name,
+        phoneNumber: pickup.phoneNumber,
+        address: "", // Will need to be filled in later
+        items: pickup.items,
+        images: pickup.images, // Copy the same images
+        notes: `Converted from pickup on ${new Date().toLocaleDateString()}. Original notes: ${pickup.notes || 'No notes'}`,
+        deliveryDate: new Date(), // Default to today
+      },
+    });
+
+    console.log(`Pickup ${pickupId} converted to delivery ${delivery.id}`);
+    res.status(201).json(delivery);
+  } catch (error) {
+    console.error("Error converting pickup to delivery:", error);
+    next(error);
+  }
+});
+
 module.exports = router;
 
