@@ -133,10 +133,10 @@ router.get("/analyze", verifyToken, async (req, res, next) => {
     }
 });
 
-// Cleanup endpoint - actually deletes orphaned files
+// Batch cleanup endpoint - deletes orphaned files in small batches
 router.post("/cleanup", verifyToken, async (req, res, next) => {
     try {
-        const { confirm } = req.body;
+        const { confirm, batchSize = 100 } = req.body;
         
         if (!confirm) {
             return res.status(400).json({ 
@@ -144,22 +144,51 @@ router.post("/cleanup", verifyToken, async (req, res, next) => {
             });
         }
         
-        console.log('🗑️ Starting cleanup of orphaned files...');
+        console.log(`🗑️ Starting batch cleanup (${batchSize} files at a time)...`);
         
-        // First, get the analysis to know what to delete
-        const analysisResponse = await new Promise((resolve, reject) => {
-            // Reuse the analysis logic
-            router.stack[0].route.stack[0].handle(req, {
-                json: resolve,
-                status: () => ({ json: reject })
-            }, reject);
+        // Get all legitimate images from database
+        const pickups = await prisma.pickup.findMany({
+            where: { NOT: { images: { isEmpty: true } } },
+            select: { images: true }
         });
         
-        if (!analysisResponse || !analysisResponse.orphanedFiles) {
-            return res.status(500).json({ error: "Could not analyze files for cleanup" });
-        }
+        const deliveries = await prisma.delivery.findMany({
+            where: { NOT: { images: { isEmpty: true } } },
+            select: { images: true }
+        });
         
-        const orphanedFiles = analysisResponse.orphanedFiles;
+        // Collect all legitimate image filenames
+        const legitimateImages = new Set();
+        
+        [...pickups, ...deliveries].forEach(record => {
+            if (record.images) {
+                record.images.forEach(image => {
+                    legitimateImages.add(image);
+                    legitimateImages.add(`thumb_${image}`);
+                });
+            }
+        });
+        
+        // Get all files in upload directory
+        const allFiles = await fs.readdir(uploadDirectory);
+        const imageFiles = allFiles.filter(file => {
+            const ext = path.extname(file).toLowerCase();
+            return ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(ext);
+        });
+        
+        // Find orphaned files
+        const orphanedFiles = [];
+        for (const file of imageFiles) {
+            if (!legitimateImages.has(file)) {
+                const filePath = path.join(uploadDirectory, file);
+                try {
+                    const stats = await fs.stat(filePath);
+                    orphanedFiles.push({ file, size: stats.size });
+                } catch (error) {
+                    // File might have been deleted already, skip it
+                }
+            }
+        }
         
         if (orphanedFiles.length === 0) {
             return res.json({
@@ -170,13 +199,14 @@ router.post("/cleanup", verifyToken, async (req, res, next) => {
             });
         }
         
-        // Actually delete the files
+        // Delete in batches
+        const filesToDelete = orphanedFiles.slice(0, batchSize);
         let deletedCount = 0;
         let deletedSize = 0;
         let errorCount = 0;
         const errors = [];
         
-        for (const { file, size } of orphanedFiles) {
+        for (const { file, size } of filesToDelete) {
             try {
                 const filePath = path.join(uploadDirectory, file);
                 await fs.unlink(filePath);
@@ -190,13 +220,18 @@ router.post("/cleanup", verifyToken, async (req, res, next) => {
             }
         }
         
+        const remainingOrphaned = orphanedFiles.length - filesToDelete.length;
+        
         res.json({
             success: true,
-            message: "Cleanup completed!",
+            message: `Batch cleanup completed! ${remainingOrphaned} files remaining.`,
             deletedCount,
             errorCount,
             freedSpace: formatBytes(deletedSize),
-            errors: errors.slice(0, 10) // Show first 10 errors if any
+            remainingOrphanedFiles: remainingOrphaned,
+            totalOrphanedFiles: orphanedFiles.length,
+            needsMoreBatches: remainingOrphaned > 0,
+            errors: errors.slice(0, 5)
         });
         
     } catch (error) {
