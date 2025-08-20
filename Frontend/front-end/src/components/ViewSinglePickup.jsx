@@ -6,6 +6,7 @@ import './ViewSinglePickup.css'; // Import the CSS file
 const ViewSinglePickup = () => {
   const [singlePickup, setSinglePickup] = useState(null);
   const [error, setError] = useState(null);
+  const [isConverting, setIsConverting] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -68,6 +69,41 @@ const ViewSinglePickup = () => {
         console.error("Failed to delete pickup:", error);
         setError(`Failed to delete pickup: ${error.message}`);
         alert("Failed to delete pickup.");
+      }
+    }
+  };
+
+  const handleConvertToDelivery = async () => {
+    if (window.confirm("Convert this pickup to a delivery? This will create a new delivery record and you'll need to add the delivery address.")) {
+      setIsConverting(true);
+      try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`https://pickup-delivery-gspc.onrender.com/api/pickups/${id}/convert-to-delivery`, {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const newDelivery = await response.json();
+          console.log("Pickup converted to delivery successfully!");
+          
+          // Show success message and redirect to edit the new delivery
+          alert("Pickup converted to delivery! Please add the delivery address and verify the details.");
+          navigate(`/editdeliveryform/${newDelivery.id}`);
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to convert pickup to delivery");
+        }
+      } catch (error) {
+        console.error("Error converting pickup to delivery:", error);
+        setError("Failed to convert pickup to delivery. Please try again.");
+        alert("Failed to convert pickup to delivery. Please try again.");
+      } finally {
+        setIsConverting(false);
       }
     }
   };
@@ -146,6 +182,13 @@ const ViewSinglePickup = () => {
           </button>
           <button onClick={() => navigate(`/editpickupform/${id}`)} className="edit-button">
             Edit
+          </button>
+          <button 
+            onClick={handleConvertToDelivery} 
+            className="convert-button"
+            disabled={isConverting}
+          >
+            {isConverting ? 'Converting...' : 'Convert to Delivery'}
           </button>
         </div>
       </div>
